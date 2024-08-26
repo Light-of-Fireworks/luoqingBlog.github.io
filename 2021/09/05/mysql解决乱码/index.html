@@ -1,0 +1,120 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="luoqing"><meta name="copyright" content="luoqing"><meta name="generator" content="Hexo 6.3.0"><meta name="theme" content="hexo-theme-yun"><title>mysql解决乱码 | luoqing的博客</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/star-markdown-css@0.4.1/dist/yun/yun-markdown.min.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/prism-theme-vars/base.css"><script src="https://fastly.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>function initScrollReveal() {
+  [".post-card",".markdown-body img"].forEach((target)=> {
+    ScrollReveal().reveal(target);
+  })
+}
+document.addEventListener("DOMContentLoaded", initScrollReveal);
+document.addEventListener("pjax:success", initScrollReveal);
+</script><link rel="icon" type="image/svg+xml" href="/yun.svg"><link rel="mask-icon" href="/yun.svg" color="#0078E7"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fastly.jsdelivr.net/npm/" crossorigin><script id="yun-config">
+    window.Yun = {}
+    window.CONFIG = {"hostname":"example.com","root":"/","title":"无人扶我青云志 我自踏雪至山巅","version":"1.10.9","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"搜索...","empty":"找不到您查询的内容: ${query}","hits":"找到 ${hits} 条结果","hits_time":"找到 ${hits} 条结果（用时 ${time} 毫秒）"},"anonymous_image":"https://cdn.yunyoujun.cn/img/avatar/none.jpg","say":{"api":"https://v1.hitokoto.cn","hitokoto":true},"local_search":{"path":"/search.xml"},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"fireworks":{"colors":["102, 167, 221","62, 131, 225","33, 78, 194"]},"vendors":{"host":"https://fastly.jsdelivr.net/npm/","darken":"https://fastly.jsdelivr.net/npm/darken@1.5.0"}};
+  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/hexo-theme-yun.js" type="module"></script><link rel="preconnect" href="https://www.google-analytics.com" crossorigin><script async src="https://www.googletagmanager.com/gtag/js?id=G-1LL0D86CY9"></script><script>if (CONFIG.hostname === location.hostname) {
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-1LL0D86CY9');
+}</script><script data-ad-client="ca-pub-2245427233262012" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><script>(function(){
+  var bp = document.createElement('script');
+  var curProtocol = window.location.protocol.split(':')[0];
+  if (curProtocol === 'https') {
+    bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+  }
+  else {
+    bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+  }
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(bp, s);
+})();</script><!-- Google Tag Manager --><script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-M9KWR9L');</script><!-- End Google Tag Manager --><meta name="description" content="首先我们要知道编码都是在mysql的my.ini配置文件中配置的，所以我们可以在安装好mysql后就对其配置文件进行更改，也可以后期更改，但是要注意，改配置文件之前请先关闭mysql服务，然后再更改my.ini，最后启动服务，如果你在mysql服务还在运行中的时候就修改配置文件就会导致你的mysql无法关闭以及重新启动，这里切记！">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql解决乱码">
+<meta property="og:url" content="http://example.com/2021/09/05/mysql%E8%A7%A3%E5%86%B3%E4%B9%B1%E7%A0%81/index.html">
+<meta property="og:site_name" content="luoqing的博客">
+<meta property="og:description" content="首先我们要知道编码都是在mysql的my.ini配置文件中配置的，所以我们可以在安装好mysql后就对其配置文件进行更改，也可以后期更改，但是要注意，改配置文件之前请先关闭mysql服务，然后再更改my.ini，最后启动服务，如果你在mysql服务还在运行中的时候就修改配置文件就会导致你的mysql无法关闭以及重新启动，这里切记！">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-09-05T15:35:08.000Z">
+<meta property="article:modified_time" content="2023-11-19T07:27:07.000Z">
+<meta property="article:author" content="luoqing">
+<meta property="article:tag" content="mysql">
+<meta name="twitter:card" content="summary"><script>(function() {
+  if (CONFIG.mode !== 'auto') return
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  const setting = localStorage.getItem('darken-mode') || 'auto'
+  if (setting === 'dark' || (prefersDark && setting !== 'light'))
+    document.documentElement.classList.toggle('dark', true)
+})()</script></head><body><script src="https://code.iconify.design/2/2.1.1/iconify.min.js"></script><script>// Define global variable
+IconifyProviders = {
+  // Empty prefix: overwrite default API provider configuration
+  '': {
+    // Use custom API first, use Iconify public API as backup
+    resources: [
+        'https://api.iconify.design',
+    ],
+    // Wait for 1 second before switching API hosts
+    rotate: 1000,
+  },
+};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="文章目录"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="站点概览"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="luoqing"><img width="96" loading="lazy" src="/images/avatar.jpg" alt="luoqing"><span class="site-author-status" title="Looking for dawn.">😣,</span></a><div class="site-author-name"><a href="/about/">luoqing</a></div><span class="site-name">luoqing的博客</span><sub class="site-subtitle"></sub><div class="site-description"></div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="首页"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="归档"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">87</span></a></div><div class="site-state-item"><a href="/categories/" title="分类"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">0</span></a></div><div class="site-state-item"><a href="/tags/" title="标签"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">69</span></a></div><a class="site-state-item hty-icon-button" href="/about/#comment" title="留言板"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:clipboard-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><div class="links-of-author"><a class="links-of-author-item hty-icon-button" rel="noopener" href="tencent://message/?v=3&amp;uin=792316496&amp;site=qq&amp;menu=yes" title="QQ" target="_blank" style="color:#12B7F5"><span class="icon iconify" data-icon="ri:qq-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://github.com/Light-of-Fireworks" title="GitHub" target="_blank" style="color:#6e5494"><span class="icon iconify" data-icon="ri:github-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="mailto:qingluo363@gmail.com" title="E-Mail" target="_blank" style="color:#8E71C1"><span class="icon iconify" data-icon="ri:mail-line"></span></a></div><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#win10"><span class="toc-number">1.</span> <span class="toc-text">win10</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#mac"><span class="toc-number">2.</span> <span class="toc-text">mac</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#liunx"><span class="toc-number">3.</span> <span class="toc-text">liunx</span></a></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="http://example.com/2021/09/05/mysql%E8%A7%A3%E5%86%B3%E4%B9%B1%E7%A0%81/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="luoqing"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="luoqing的博客"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">mysql解决乱码</h1><div class="post-meta"><div class="post-time"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <time title="创建时间：2021-09-05 23:35:08" itemprop="dateCreated datePublished" datetime="2021-09-05T23:35:08+08:00">2021-09-05</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-2-line"></span></span> <time title="修改时间：2023-11-19 15:27:07" itemprop="dateModified" datetime="2023-11-19T15:27:07+08:00">2023-11-19</time></div><div class="post-classify"><span class="post-tag"><a class="tag-item" href="/tags/mysql/" style="--text-color:var(--hty-text-color)"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="tag-name">mysql</span></a></span></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><p>首先我们要知道编码都是在mysql的my.ini配置文件中配置的，所以我们可以在安装好mysql后就对其配置文件进行更改，也可以后期更改，但是要注意，改配置文件之前请先关闭mysql服务，然后再更改my.ini，最后启动服务，如果你在mysql服务还在运行中的时候就修改配置文件就会导致你的mysql无法关闭以及重新启动，这里切记！</p>
+<span id="more"></span>
+
+<p>我们先讲一下win10中解决乱码问题</p>
+<h2 id="win10"><a href="#win10" class="headerlink" title="win10"></a>win10</h2><p>首先我们在官网下载好mysql的exe安装文件进行安装完成后我们可以自己找到对应的安装路径，这里我比较喜欢安装软件就默认放在c盘，所以我们就拿默认的路径做个例子，mysql5.7的安装路径在C:\Program Files\MySQL\MySQL Server 5.7，我们进入这个目录下可以发现并没有my.ini这个配置文件的存在，如果有我们就可以直接进行更改，那么如果没有应该怎么办呢，他自己不会生成那我们就帮他创建一个一摸一样的名字的文件咯，所以我们在此路径下新建一个文件命名为my.ini，然后我们要对这个文件进行编辑，这里注意，尽量使用Notepad++这样的专业编辑工具，千万不要直接拿记事本进行编辑，出现编码的问题导致无法启动服务，如果你说记事本都可以代替专业软件那还需要专门开发一个这样的软件干嘛，所以大家尽量使用专业的编辑工具对配置类的文件进行编辑</p>
+<p>第一步：关闭mysql服务</p>
+<p>第二步：创建my.ini文件</p>
+<p>这里我们新建完成my.ini后因为是一个新的文件里面是没有任何内容的所以我们在里面直接新增内容即可</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token section"><span class="token punctuation">[</span><span class="token section-name selector">client</span><span class="token punctuation">]</span></span>
+<span class="token key attr-name">default-character-set</span><span class="token punctuation">=</span><span class="token value attr-value">utf8</span>
+
+<span class="token section"><span class="token punctuation">[</span><span class="token section-name selector">mysqld</span><span class="token punctuation">]</span></span>
+<span class="token key attr-name">default-storage-engine</span><span class="token punctuation">=</span><span class="token value attr-value">INNODB</span>
+<span class="token key attr-name">character-set-server</span><span class="token punctuation">=</span><span class="token value attr-value">utf8</span>
+<span class="token key attr-name">collation-server</span><span class="token punctuation">=</span><span class="token value attr-value">utf8_general_ci</span></code></pre>
+
+<p>然后保存启动mysql服务即可，如果这里成功启动mysql就说明成功一半了，我们还需要登录mysql看一看配置文件到底有没有生效</p>
+<p>我们使用mysql -u root -p进行登录</p>
+<p>然后mysql界面执行status,如果出现以下的配置都是utf8那么就成功了</p>
+<p>Server characterset:    utf8<br>Db     characterset:    utf8<br>Client characterset:    utf8<br>Conn.  characterset:    utf8</p>
+<h2 id="mac"><a href="#mac" class="headerlink" title="mac"></a>mac</h2><p>其实不管是什么系统都像上面说的只需要修改配置文件即可，所以我们也就是需要知道mac安装完成mysql后配置文件放在什么地方，然后对其进行更改即可</p>
+<p>mac的路径是：&#x2F;etc&#x2F;my.cnf</p>
+<p>这里也是一样，如果说我们切换到&#x2F;etc目录并没有发现my.cnf这个文件存在我们也是一样创建一个就可以了</p>
+<p>还是一样的操作</p>
+<p>第一步：停止mysql服务</p>
+<p>第二步：创建或编辑my.cnf文件，这里为什么说创建或编辑呢，因为如果文件存在那就编辑，如果不存在那就需要创建</p>
+<p>第三部：写入内容，这里的内容还是一样的</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token section"><span class="token punctuation">[</span><span class="token section-name selector">client</span><span class="token punctuation">]</span></span>
+<span class="token key attr-name">default-character-set</span><span class="token punctuation">=</span><span class="token value attr-value">utf8</span>
+
+<span class="token section"><span class="token punctuation">[</span><span class="token section-name selector">mysqld</span><span class="token punctuation">]</span></span>
+<span class="token key attr-name">default-storage-engine</span><span class="token punctuation">=</span><span class="token value attr-value">INNODB</span>
+<span class="token key attr-name">character-set-server</span><span class="token punctuation">=</span><span class="token value attr-value">utf8</span>
+<span class="token key attr-name">collation-server</span><span class="token punctuation">=</span><span class="token value attr-value">utf8_general_ci</span></code></pre>
+
+<p>最后再重启服务就可以了</p>
+<p>然后还是像上面一样使用status查看状态，如果都是utf8那么就生效了</p>
+<h2 id="liunx"><a href="#liunx" class="headerlink" title="liunx"></a>liunx</h2><p>liunx的教程跟mac是一样的，配置文件也是放在&#x2F;etc&#x2F;my.cnf下，如果没有则自己创建一个</p>
+</div></section><ul class="post-copyright"><li class="post-copyright-author"><strong>本文作者：</strong>luoqing</li><li class="post-copyright-link"><strong>本文链接：</strong><a href="http://example.com/2021/09/05/mysql%E8%A7%A3%E5%86%B3%E4%B9%B1%E7%A0%81/" title="mysql解决乱码">http://example.com/2021/09/05/mysql%E8%A7%A3%E5%86%B3%E4%B9%B1%E7%A0%81/</a></li><li class="post-copyright-license"><strong>版权声明：</strong>本博客所有文章除特别声明外，均默认采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><span class="icon iconify" data-icon="ri:creative-commons-line"></span><span class="icon iconify" data-icon="ri:creative-commons-by-line"></span><span class="icon iconify" data-icon="ri:creative-commons-nc-line"></span><span class="icon iconify" data-icon="ri:creative-commons-sa-line"></span></a> 许可协议。</li></ul></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2021/09/25/SpringBoot%E6%95%B4%E5%90%88Quartz%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/" rel="prev" title="SpringBoot整合Quartz定时任务"><span class="icon iconify" data-icon="ri:arrow-left-s-line"></span><span class="post-nav-text">SpringBoot整合Quartz定时任务</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/2021/09/05/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F-Quartz%E6%95%B4%E5%90%88Spring/" rel="next" title="定时任务的实现方式+Quartz整合Spring"><span class="post-nav-text">定时任务的实现方式+Quartz整合Spring</span><span class="icon iconify" data-icon="ri:arrow-right-s-line"></span></a></div></div></div><div class="hty-card" id="comment"><div class="comment-tooltip text-center"><span>如果您有任何关于博客内容的相关讨论，欢迎前往 <a href="https://github.com/Light-of-Fireworks" target="_blank">GitHub</a> 与我交流。</span><br></div></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2021 – 2024 </span><a class="with-love" id="animate" target="_blank" rel="noopener" href="http://luoqingblog.gitee.io/" title="主页"><span class="icon iconify" data-icon="ri:cloud-line"></span></a><span class="author"> luoqing</span></div><div class="powered"><span>由 <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 驱动 v6.3.0</span><span class="footer-separator">|</span><span>主题 - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.10.9</span></div></footer></div><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><span class="icon iconify" data-icon="ri:arrow-up-s-line"></span><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a><a class="popup-trigger hty-icon-button icon-search" id="search" href="javascript:;" title="搜索"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:search-line"></span></span></a><script>window.addEventListener("DOMContentLoaded", () => {
+  // Handle and trigger popup window
+  document.querySelector(".popup-trigger").addEventListener("click", () => {
+    document.querySelector(".popup").classList.add("show");
+    setTimeout(() => {
+      document.querySelector(".search-input").focus();
+    }, 100);
+  });
+
+  // Monitor main search box
+  const onPopupClose = () => {
+    document.querySelector(".popup").classList.remove("show");
+  };
+
+  document.querySelector(".popup-btn-close").addEventListener("click", () => {
+    onPopupClose();
+  });
+
+  window.addEventListener("keyup", event => {
+    if (event.key === "Escape") {
+      onPopupClose();
+    }
+  });
+});
+</script><script src="https://fastly.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js"></script><script src="/js/search/local-search.js" defer type="module"></script><div class="popup search-popup"><div class="search-header"><span class="popup-btn-close close-icon hty-icon-button"><span class="icon iconify" data-icon="ri:close-line"></span></span></div><div class="search-input-container"><input class="search-input" id="local-search-input" type="text" placeholder="搜索..." value=""></div><div class="search-result-container"></div></div><script src="https://fastly.jsdelivr.net/npm/medium-zoom@1.0.6/dist/medium-zoom.min.js"></script><script>const images = [...document.querySelectorAll('.markdown-body img')]
+mediumZoom(images)</script><style>.medium-zoom-image {
+  z-index: 99;
+}</style></body></html>

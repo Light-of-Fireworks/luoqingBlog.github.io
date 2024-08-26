@@ -1,0 +1,235 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="luoqing"><meta name="copyright" content="luoqing"><meta name="generator" content="Hexo 6.3.0"><meta name="theme" content="hexo-theme-yun"><title>dockerfile创建甜糖镜像 | luoqing的博客</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/star-markdown-css@0.4.1/dist/yun/yun-markdown.min.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/prism-theme-vars/base.css"><script src="https://fastly.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>function initScrollReveal() {
+  [".post-card",".markdown-body img"].forEach((target)=> {
+    ScrollReveal().reveal(target);
+  })
+}
+document.addEventListener("DOMContentLoaded", initScrollReveal);
+document.addEventListener("pjax:success", initScrollReveal);
+</script><link rel="icon" type="image/svg+xml" href="/yun.svg"><link rel="mask-icon" href="/yun.svg" color="#0078E7"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fastly.jsdelivr.net/npm/" crossorigin><script id="yun-config">
+    window.Yun = {}
+    window.CONFIG = {"hostname":"example.com","root":"/","title":"无人扶我青云志 我自踏雪至山巅","version":"1.10.9","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"搜索...","empty":"找不到您查询的内容: ${query}","hits":"找到 ${hits} 条结果","hits_time":"找到 ${hits} 条结果（用时 ${time} 毫秒）"},"anonymous_image":"https://cdn.yunyoujun.cn/img/avatar/none.jpg","say":{"api":"https://v1.hitokoto.cn","hitokoto":true},"local_search":{"path":"/search.xml"},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"fireworks":{"colors":["102, 167, 221","62, 131, 225","33, 78, 194"]},"vendors":{"host":"https://fastly.jsdelivr.net/npm/","darken":"https://fastly.jsdelivr.net/npm/darken@1.5.0"}};
+  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/hexo-theme-yun.js" type="module"></script><link rel="preconnect" href="https://www.google-analytics.com" crossorigin><script async src="https://www.googletagmanager.com/gtag/js?id=G-1LL0D86CY9"></script><script>if (CONFIG.hostname === location.hostname) {
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-1LL0D86CY9');
+}</script><script data-ad-client="ca-pub-2245427233262012" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><script>(function(){
+  var bp = document.createElement('script');
+  var curProtocol = window.location.protocol.split(':')[0];
+  if (curProtocol === 'https') {
+    bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+  }
+  else {
+    bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+  }
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(bp, s);
+})();</script><!-- Google Tag Manager --><script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-M9KWR9L');</script><!-- End Google Tag Manager --><meta name="description" content="由于每次都使用别人的容器，总是觉得甜糖没有量，就想自己搭一个容器跑一下试试，试了用centos:7作为基础镜像无法运行，使用ubuntu可以正常运行甜糖">
+<meta property="og:type" content="article">
+<meta property="og:title" content="dockerfile创建甜糖镜像">
+<meta property="og:url" content="http://example.com/2023/10/08/dockerfile%E5%88%9B%E5%BB%BA%E7%94%9C%E7%B3%96%E9%95%9C%E5%83%8F/index.html">
+<meta property="og:site_name" content="luoqing的博客">
+<meta property="og:description" content="由于每次都使用别人的容器，总是觉得甜糖没有量，就想自己搭一个容器跑一下试试，试了用centos:7作为基础镜像无法运行，使用ubuntu可以正常运行甜糖">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-10-08T09:12:02.000Z">
+<meta property="article:modified_time" content="2023-10-08T10:18:28.000Z">
+<meta property="article:author" content="luoqing">
+<meta property="article:tag" content="docker">
+<meta property="article:tag" content="dockerfile">
+<meta property="article:tag" content="ttnode">
+<meta name="twitter:card" content="summary"><script>(function() {
+  if (CONFIG.mode !== 'auto') return
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  const setting = localStorage.getItem('darken-mode') || 'auto'
+  if (setting === 'dark' || (prefersDark && setting !== 'light'))
+    document.documentElement.classList.toggle('dark', true)
+})()</script></head><body><script src="https://code.iconify.design/2/2.1.1/iconify.min.js"></script><script>// Define global variable
+IconifyProviders = {
+  // Empty prefix: overwrite default API provider configuration
+  '': {
+    // Use custom API first, use Iconify public API as backup
+    resources: [
+        'https://api.iconify.design',
+    ],
+    // Wait for 1 second before switching API hosts
+    rotate: 1000,
+  },
+};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="文章目录"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="站点概览"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="luoqing"><img width="96" loading="lazy" src="/images/avatar.jpg" alt="luoqing"><span class="site-author-status" title="Looking for dawn.">😣,</span></a><div class="site-author-name"><a href="/about/">luoqing</a></div><span class="site-name">luoqing的博客</span><sub class="site-subtitle"></sub><div class="site-description"></div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="首页"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="归档"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">87</span></a></div><div class="site-state-item"><a href="/categories/" title="分类"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">0</span></a></div><div class="site-state-item"><a href="/tags/" title="标签"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">69</span></a></div><a class="site-state-item hty-icon-button" href="/about/#comment" title="留言板"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:clipboard-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><div class="links-of-author"><a class="links-of-author-item hty-icon-button" rel="noopener" href="tencent://message/?v=3&amp;uin=792316496&amp;site=qq&amp;menu=yes" title="QQ" target="_blank" style="color:#12B7F5"><span class="icon iconify" data-icon="ri:qq-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://github.com/Light-of-Fireworks" title="GitHub" target="_blank" style="color:#6e5494"><span class="icon iconify" data-icon="ri:github-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="mailto:qingluo363@gmail.com" title="E-Mail" target="_blank" style="color:#8E71C1"><span class="icon iconify" data-icon="ri:mail-line"></span></a></div><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1%E3%80%81%E6%8B%89%E5%8F%96%E5%9F%BA%E7%A1%80%E9%95%9C%E5%83%8F"><span class="toc-number">1.</span> <span class="toc-text">1、拉取基础镜像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2%E3%80%81%E5%88%9B%E5%BB%BAdockerfile"><span class="toc-number">2.</span> <span class="toc-text">2、创建dockerfile</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3%E3%80%81%E6%9E%84%E5%BB%BA%E9%95%9C%E5%83%8F"><span class="toc-number">3.</span> <span class="toc-text">3、构建镜像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4%E3%80%81%E5%88%9B%E5%BB%BAdocker-compose%E5%90%AF%E5%8A%A8%E8%84%9A%E6%9C%AC"><span class="toc-number">4.</span> <span class="toc-text">4、创建docker-compose启动脚本</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5%E3%80%81%E4%BD%BF%E7%94%A8%E5%85%BC%E5%AE%B9%E6%A8%A1%E5%BC%8F%E8%AE%BE%E7%BD%AE%E5%90%AF%E5%8A%A8%E5%AE%B9%E5%99%A8"><span class="toc-number">5.</span> <span class="toc-text">5、使用兼容模式设置启动容器</span></a></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="http://example.com/2023/10/08/dockerfile%E5%88%9B%E5%BB%BA%E7%94%9C%E7%B3%96%E9%95%9C%E5%83%8F/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="luoqing"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="luoqing的博客"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">dockerfile创建甜糖镜像</h1><div class="post-meta"><div class="post-time"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <time title="创建时间：2023-10-08 17:12:02" itemprop="dateCreated datePublished" datetime="2023-10-08T17:12:02+08:00">2023-10-08</time></div><div class="post-classify"><span class="post-tag"><a class="tag-item" href="/tags/docker/" style="--text-color:var(--hty-text-color)"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="tag-name">docker</span></a><a class="tag-item" href="/tags/dockerfile/" style="--text-color:var(--hty-text-color)"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="tag-name">dockerfile</span></a><a class="tag-item" href="/tags/ttnode/" style="--text-color:var(--hty-text-color)"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="tag-name">ttnode</span></a></span></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><p>由于每次都使用别人的容器，总是觉得甜糖没有量，就想自己搭一个容器跑一下试试，试了用centos:7作为基础镜像无法运行，使用ubuntu可以正常运行甜糖</p>
+<span id="more"></span>
+
+<h2 id="1、拉取基础镜像"><a href="#1、拉取基础镜像" class="headerlink" title="1、拉取基础镜像"></a>1、拉取基础镜像</h2><p>可以使用常用的一些基础镜像为底层，比如debian、centos、ubuntu等等，如果基础镜像不适用你的应用程序，可以更换，这里以ubuntu为示例</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> pull ubuntu:latest</code></pre>
+
+<h2 id="2、创建dockerfile"><a href="#2、创建dockerfile" class="headerlink" title="2、创建dockerfile"></a>2、创建dockerfile</h2><p>首先可以看一下官方部署甜糖脚本的gitee项目：<a target="_blank" rel="noopener" href="https://gitee.com/shenzhen-sweet-sugar/ttnode-auto-deploy">https://gitee.com/shenzhen-sweet-sugar/ttnode-auto-deploy</a></p>
+<p>安装脚本：<a target="_blank" rel="noopener" href="https://gitee.com/shenzhen-sweet-sugar/ttnode-auto-deploy/blob/master/setup.sh">https://gitee.com/shenzhen-sweet-sugar/ttnode-auto-deploy/blob/master/setup.sh</a></p>
+<p>脚本内容如下：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token assign-left variable">cache</span><span class="token operator">=</span><span class="token string">"/mnt/data/ttnode"</span>
+<span class="token keyword">case</span> <span class="token variable">$1</span> <span class="token keyword">in</span>
+    <span class="token parameter variable">-c</span><span class="token operator">=</span>*<span class="token operator">|</span>--cache<span class="token operator">=</span>*<span class="token punctuation">)</span>
+    <span class="token assign-left variable">cache</span><span class="token operator">=</span><span class="token string">"<span class="token variable">$&#123;1<span class="token operator">#</span>*=&#125;</span>"</span>
+    <span class="token punctuation">;</span><span class="token punctuation">;</span>
+    *<span class="token punctuation">)</span>
+    <span class="token punctuation">;</span><span class="token punctuation">;</span>
+<span class="token keyword">esac</span>
+
+<span class="token function">apt-get</span> update <span class="token parameter variable">-y</span>
+<span class="token function">apt-get</span> <span class="token function">install</span> <span class="token parameter variable">-y</span> <span class="token function">wget</span> ca-certificates qrencode <span class="token function">unzip</span> <span class="token function">tar</span>
+<span class="token function">apt-get</span> upgrade <span class="token function">tar</span> <span class="token function">unzip</span>
+
+<span class="token assign-left variable">manager_x86</span><span class="token operator">=</span><span class="token string">"ttnode-manager-x86"</span>
+<span class="token assign-left variable">manager_arm32</span><span class="token operator">=</span><span class="token string">"ttnode-manager-arm32"</span>
+<span class="token assign-left variable">manager_arm64</span><span class="token operator">=</span><span class="token string">"ttnode-manager-arm64"</span>
+<span class="token assign-left variable">arm32_url</span><span class="token operator">=</span><span class="token string">"https://gitee.com/shenzhen-sweet-sugar/ttnode-auto-deploy/attach_files/1104920/download/ttnode-manager-arm32.tar.gz"</span>
+<span class="token assign-left variable">arm64_url</span><span class="token operator">=</span><span class="token string">"https://gitee.com/shenzhen-sweet-sugar/ttnode-auto-deploy/attach_files/1104919/download/ttnode-manager-arm64.tar.gz"</span>
+<span class="token assign-left variable">x86_url</span><span class="token operator">=</span><span class="token string">"https://gitee.com/shenzhen-sweet-sugar/ttnode-auto-deploy/attach_files/1104921/download/ttnode-manager-x86.tar.gz"</span>
+<span class="token assign-left variable">deploy_dir</span><span class="token operator">=</span><span class="token string">"/usr/node"</span>
+<span class="token assign-left variable">manager</span><span class="token operator">=</span>manager_arm32
+
+<span class="token assign-left variable">platform</span><span class="token operator">=</span><span class="token variable"><span class="token variable">$(</span><span class="token function">uname</span> <span class="token parameter variable">-a</span><span class="token variable">)</span></span>
+<span class="token keyword">case</span> <span class="token variable">$platform</span> <span class="token keyword">in</span>
+    *x86*<span class="token punctuation">)</span>
+        <span class="token assign-left variable">url</span><span class="token operator">=</span><span class="token variable">$x86_url</span>
+        <span class="token assign-left variable">manager</span><span class="token operator">=</span><span class="token variable">$manager_x86</span>
+        <span class="token punctuation">;</span><span class="token punctuation">;</span>
+    *amd64*<span class="token punctuation">)</span>
+        <span class="token assign-left variable">url</span><span class="token operator">=</span><span class="token variable">$x86_url</span>
+        <span class="token assign-left variable">manager</span><span class="token operator">=</span><span class="token variable">$manager_x86</span>
+        <span class="token punctuation">;</span><span class="token punctuation">;</span>
+    *armv8*<span class="token punctuation">)</span>
+        <span class="token assign-left variable">url</span><span class="token operator">=</span><span class="token variable">$arm64_url</span>
+        <span class="token assign-left variable">manager</span><span class="token operator">=</span><span class="token variable">$manager_arm64</span>
+        <span class="token punctuation">;</span><span class="token punctuation">;</span>
+    *arm64*<span class="token punctuation">)</span>
+        <span class="token assign-left variable">url</span><span class="token operator">=</span><span class="token variable">$arm64_url</span>
+        <span class="token assign-left variable">manager</span><span class="token operator">=</span><span class="token variable">$manager_arm64</span>
+        <span class="token punctuation">;</span><span class="token punctuation">;</span>
+    *aarch64*<span class="token punctuation">)</span>
+        <span class="token assign-left variable">url</span><span class="token operator">=</span><span class="token variable">$arm64_url</span>
+        <span class="token assign-left variable">manager</span><span class="token operator">=</span><span class="token variable">$manager_arm64</span>
+        <span class="token punctuation">;</span><span class="token punctuation">;</span>
+    *<span class="token punctuation">)</span>
+        <span class="token assign-left variable">url</span><span class="token operator">=</span><span class="token variable">$arm32_url</span>
+        <span class="token assign-left variable">manager</span><span class="token operator">=</span><span class="token variable">$manager_arm32</span>
+<span class="token keyword">esac</span>
+
+<span class="token builtin class-name">echo</span> <span class="token variable">$url</span>
+<span class="token assign-left variable">tar_manager</span><span class="token operator">=</span><span class="token string">"<span class="token variable">$manager</span>.tar.gz"</span>
+<span class="token function">mkdir</span> <span class="token parameter variable">-p</span> /opt/app
+<span class="token function">mkdir</span> <span class="token parameter variable">-p</span> <span class="token variable">$cache</span>
+<span class="token function">rm</span> <span class="token parameter variable">-rf</span> <span class="token variable">$deploy_dir</span>
+<span class="token function">rm</span> <span class="token parameter variable">-rf</span> /usr/<span class="token variable">$tar_manager</span>
+
+<span class="token builtin class-name">cd</span> /usr
+
+<span class="token function">wget</span> <span class="token variable">$url</span>
+<span class="token function">tar</span> <span class="token parameter variable">-xvf</span> <span class="token variable">$tar_manager</span>
+
+<span class="token function">mv</span> <span class="token variable">$manager</span> <span class="token function">node</span>
+
+<span class="token builtin class-name">cd</span> /usr/node
+<span class="token builtin class-name">echo</span> <span class="token variable">$cache</span> <span class="token operator">></span> config.txt
+<span class="token function">chmod</span> +x ttnode_manager
+
+<span class="token comment"># 开机启动设置</span>
+<span class="token function">wget</span> <span class="token string">"https://gitee.com/shenzhen-sweet-sugar/ttnode-auto-deploy/raw/master/rc.local"</span>
+<span class="token function">cp</span> <span class="token variable">$deploy_dir</span>/rc.local /etc/rc.local
+<span class="token function">chmod</span> +x /etc/rc.local
+systemctl daemon-reload
+
+/etc/rc.local
+</code></pre>
+
+<p>可以看到步骤大概如下：</p>
+<p>第一步根据系统类型下载不同的压缩包，我这里是x86_64的系统，所以下载ttnode-manager-x86.tar.gz</p>
+<p>第二步将ttnode-manager-x86.tar.gz解压到&#x2F;usr并重命名为node</p>
+<p>第三步安装所需命令</p>
+<p>apt-get update -y<br>apt-get install -y wget ca-certificates qrencode unzip tar<br>apt-get upgrade tar unzip</p>
+<p>第四步创建所需文件夹</p>
+<p>mkdir -p &#x2F;opt&#x2F;app</p>
+<p>mkdir -p &#x2F;mnt&#x2F;data&#x2F;ttnode</p>
+<p>第五步将缓存目录写入配置文件</p>
+<p>echo &#x2F;mnt&#x2F;data&#x2F;ttnode &gt; &#x2F;usr&#x2F;node&#x2F;config.txt</p>
+<p>赋权启动脚本</p>
+<p>chmod 777 &#x2F;usr&#x2F;node&#x2F;ttnode_manager</p>
+<p>启动脚本</p>
+<p>.&#x2F;ttnode_manager</p>
+<p>根据如上步骤编写Dockerfile如下：</p>
+<pre class="language-docker" data-language="docker"><code class="language-docker"><span class="token comment"># 使用基础镜像CentOS 7</span>
+<span class="token comment">#FROM centos:7</span>
+<span class="token instruction"><span class="token keyword">FROM</span> ubuntu:latest</span>
+
+<span class="token comment"># 第一步：更新系统并安装所需命令</span>
+<span class="token instruction"><span class="token keyword">RUN</span> apt-get update -y &amp;&amp; <span class="token operator">\</span>
+    apt-get install -y wget ca-certificates qrencode unzip tar</span>
+
+<span class="token comment"># 第二步：将ttnode-manager-x86.tar.gz自动解压到/usr并重命名为node</span>
+<span class="token instruction"><span class="token keyword">ADD</span> ttnode-manager-x86.tar.gz /usr/</span>
+<span class="token instruction"><span class="token keyword">RUN</span> mv /usr/ttnode-manager-x86 /usr/node</span>
+
+<span class="token comment"># 第三步：创建所需文件夹</span>
+<span class="token instruction"><span class="token keyword">RUN</span> mkdir -p /opt/app &amp;&amp; <span class="token operator">\</span>
+    mkdir -p /mnt/data/ttnode</span>
+
+<span class="token comment"># 第四步：将缓存目录写入配置文件</span>
+<span class="token instruction"><span class="token keyword">RUN</span> echo <span class="token string">"/mnt/data/ttnode"</span> > /usr/node/config.txt</span>
+
+<span class="token comment"># 第五步：赋权启动脚本</span>
+<span class="token instruction"><span class="token keyword">RUN</span> chmod 777 /usr/node/ttnode_manager</span>
+<span class="token comment">#指定脚本工作目录</span>
+<span class="token instruction"><span class="token keyword">WORKDIR</span> /usr/node</span>
+<span class="token comment"># 启动脚本</span>
+<span class="token instruction"><span class="token keyword">ENTRYPOINT</span> [<span class="token string">"./ttnode_manager"</span>]</span>
+<span class="token comment">#CMD ["sleep", "infinity"]</span></code></pre>
+
+<h2 id="3、构建镜像"><a href="#3、构建镜像" class="headerlink" title="3、构建镜像"></a>3、构建镜像</h2><p>执行如下命令使用Dockerfile构建出自己的镜像</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> build <span class="token parameter variable">-t</span> mynode:1.0 <span class="token builtin class-name">.</span></code></pre>
+
+<p>mynode：构建镜像的名称</p>
+<p>1.0：镜像版本 如果不给则为latest，即最新版本</p>
+<h2 id="4、创建docker-compose启动脚本"><a href="#4、创建docker-compose启动脚本" class="headerlink" title="4、创建docker-compose启动脚本"></a>4、创建docker-compose启动脚本</h2><p>由于不想给太大的内存，所以可以在脚本中设置内存限制，这里设置为2g</p>
+<pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">version</span><span class="token punctuation">:</span> <span class="token string">'3'</span>
+<span class="token key atrule">services</span><span class="token punctuation">:</span>
+  <span class="token key atrule">ttnode</span><span class="token punctuation">:</span>
+    <span class="token key atrule">image</span><span class="token punctuation">:</span> mynode
+    <span class="token key atrule">container_name</span><span class="token punctuation">:</span> ttnode
+    <span class="token key atrule">network_mode</span><span class="token punctuation">:</span> host
+    <span class="token key atrule">restart</span><span class="token punctuation">:</span> always
+    <span class="token key atrule">deploy</span><span class="token punctuation">:</span>
+      <span class="token key atrule">resources</span><span class="token punctuation">:</span>
+        <span class="token key atrule">limits</span><span class="token punctuation">:</span>
+          <span class="token key atrule">memory</span><span class="token punctuation">:</span> 2g
+    <span class="token key atrule">volumes</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> /nodetemp<span class="token punctuation">:</span>/mnt/data/ttnode</code></pre>
+
+<h2 id="5、使用兼容模式设置启动容器"><a href="#5、使用兼容模式设置启动容器" class="headerlink" title="5、使用兼容模式设置启动容器"></a>5、使用兼容模式设置启动容器</h2><p>由于使用了内存限制，所以需要使用兼容模式启动docker-compose，否则内存限制不生效</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker-compose</span> <span class="token parameter variable">--compatibility</span> up <span class="token parameter variable">-d</span></code></pre>
+
+<p>–compatibility：使用兼容性运行</p>
+</div></section><ul class="post-copyright"><li class="post-copyright-author"><strong>本文作者：</strong>luoqing</li><li class="post-copyright-link"><strong>本文链接：</strong><a href="http://example.com/2023/10/08/dockerfile%E5%88%9B%E5%BB%BA%E7%94%9C%E7%B3%96%E9%95%9C%E5%83%8F/" title="dockerfile创建甜糖镜像">http://example.com/2023/10/08/dockerfile%E5%88%9B%E5%BB%BA%E7%94%9C%E7%B3%96%E9%95%9C%E5%83%8F/</a></li><li class="post-copyright-license"><strong>版权声明：</strong>本博客所有文章除特别声明外，均默认采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><span class="icon iconify" data-icon="ri:creative-commons-line"></span><span class="icon iconify" data-icon="ri:creative-commons-by-line"></span><span class="icon iconify" data-icon="ri:creative-commons-nc-line"></span><span class="icon iconify" data-icon="ri:creative-commons-sa-line"></span></a> 许可协议。</li></ul></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2023/10/09/Java%E5%88%A4%E6%96%AD%E8%8A%82%E5%81%87%E6%97%A5/" rel="prev" title="Java判断节假日"><span class="icon iconify" data-icon="ri:arrow-left-s-line"></span><span class="post-nav-text">Java判断节假日</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/2023/09/10/docker%E9%83%A8%E7%BD%B2jar%E5%8C%85/" rel="next" title="docker部署jar包"><span class="post-nav-text">docker部署jar包</span><span class="icon iconify" data-icon="ri:arrow-right-s-line"></span></a></div></div></div><div class="hty-card" id="comment"><div class="comment-tooltip text-center"><span>如果您有任何关于博客内容的相关讨论，欢迎前往 <a href="https://github.com/Light-of-Fireworks" target="_blank">GitHub</a> 与我交流。</span><br></div></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2021 – 2024 </span><a class="with-love" id="animate" target="_blank" rel="noopener" href="http://luoqingblog.gitee.io/" title="主页"><span class="icon iconify" data-icon="ri:cloud-line"></span></a><span class="author"> luoqing</span></div><div class="powered"><span>由 <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 驱动 v6.3.0</span><span class="footer-separator">|</span><span>主题 - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.10.9</span></div></footer></div><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><span class="icon iconify" data-icon="ri:arrow-up-s-line"></span><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a><a class="popup-trigger hty-icon-button icon-search" id="search" href="javascript:;" title="搜索"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:search-line"></span></span></a><script>window.addEventListener("DOMContentLoaded", () => {
+  // Handle and trigger popup window
+  document.querySelector(".popup-trigger").addEventListener("click", () => {
+    document.querySelector(".popup").classList.add("show");
+    setTimeout(() => {
+      document.querySelector(".search-input").focus();
+    }, 100);
+  });
+
+  // Monitor main search box
+  const onPopupClose = () => {
+    document.querySelector(".popup").classList.remove("show");
+  };
+
+  document.querySelector(".popup-btn-close").addEventListener("click", () => {
+    onPopupClose();
+  });
+
+  window.addEventListener("keyup", event => {
+    if (event.key === "Escape") {
+      onPopupClose();
+    }
+  });
+});
+</script><script src="https://fastly.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js"></script><script src="/js/search/local-search.js" defer type="module"></script><div class="popup search-popup"><div class="search-header"><span class="popup-btn-close close-icon hty-icon-button"><span class="icon iconify" data-icon="ri:close-line"></span></span></div><div class="search-input-container"><input class="search-input" id="local-search-input" type="text" placeholder="搜索..." value=""></div><div class="search-result-container"></div></div><script src="https://fastly.jsdelivr.net/npm/medium-zoom@1.0.6/dist/medium-zoom.min.js"></script><script>const images = [...document.querySelectorAll('.markdown-body img')]
+mediumZoom(images)</script><style>.medium-zoom-image {
+  z-index: 99;
+}</style></body></html>
